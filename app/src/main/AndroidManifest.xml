@@ -1,0 +1,27 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yunshangkeji.zhihuiyingxiao">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".a_part_common.yingxiaoApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity android:name=".a_part_common.activity.WelcomePageActivity" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".a_part_common.activity.LoginActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".a_part_common.activity.AppUpdateActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".a_part_common.activity.ChoosedIdentityActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".b_part_guide.activity.MerchandiseListActivity" android:screenOrientation="portrait"/>
+
+    </application>
+
+</manifest>
