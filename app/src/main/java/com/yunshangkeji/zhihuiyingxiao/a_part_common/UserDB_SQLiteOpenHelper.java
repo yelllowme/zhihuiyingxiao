@@ -11,13 +11,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class UserDB_SQLiteOpenHelper extends SQLiteOpenHelper {
 
+    /**
+     * 创建用户账号信息表
+     * account 账号
+     * password 密码
+     * access_token 登录token
+     * islogin 本地是否登录
+     * role 身份
+     */
+
     public static final String CREATE_USER_INFO = "create table user_info ("
             + "id integer primary key autoincrement,"
             + "account text,"
             + "password text,"
             + "access_token text,"
             + "islogin integer,"
-            + "role integer)";
+            + "role text)";
 
     public UserDB_SQLiteOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version){
         super(context, name, factory, version);

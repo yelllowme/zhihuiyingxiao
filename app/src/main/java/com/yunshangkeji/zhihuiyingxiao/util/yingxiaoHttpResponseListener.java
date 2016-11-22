@@ -1,6 +1,8 @@
 package com.yunshangkeji.zhihuiyingxiao.util;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * Created by yellow on 2016/11/16.
  * 网络请求监听回调
@@ -9,12 +11,12 @@ import org.json.JSONArray;
 public interface yingxiaoHttpResponseListener {
 
     //和服务器通信成功，并且获取状态为成功
-    public void onSuccessResponse(JSONArray jsonArray);
+    void onSuccessResponse(JSONObject jsonObject);
 
     //和服务器通信成功，但是获取状态为不成功
-    public void onConnectingError();
+    void onConnectingError();
 
     //和服务器建立连接错误
-    public void onDisconnectError();
+    void onDisconnectError();
 
 }

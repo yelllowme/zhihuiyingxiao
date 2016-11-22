@@ -31,7 +31,7 @@ public class HttpUtil {
     /**
      * 用户接口调用OpenId
      */
-    public static final String OPEN_ID = "";
+    public static final String OPEN_ID = "kN2bB3rB1dU6nD2hT1cZ4jB2fE1gT6";
 
     /**
      * APP版本信息
@@ -66,21 +66,32 @@ public class HttpUtil {
     /**
      * url
      */
-    //临时内网接口地址
-    public static String url_header = "http://192.168.0.31/appApi/";
 
-    //测试服接口地址
-    //private String url_header = "http://t2sj.tgpapp.com/appApi/";
+    //接口协议：HTTP
+    public static final String APP_API_PROTOCOL = "http://";
 
-    //正式服接口地址
-    //private String url_header = "http://sj.tgpapp.com/appApi/";
+    //接口域名（临时内网地址）
+    public static final String APP_API_DOMAIN = "192.168.0.31";
+
+    //测试服接口域名
+    // public static final String APP_API_DOMAIN = "t2sj.tgpapp.com";
+
+    //正式服接口域名
+    // public static final String APP_API_DOMAIN = "sj.tgpapp.com";
+
+    //APP接口路径
+    public static final String APP_API_PATH = "/appApi/Business/";
 
     /**
      * 接口方法名
      */
+    public static String url_header = APP_API_PROTOCOL + APP_API_DOMAIN + APP_API_PATH;
 
     //获取版本信息
-    public static String getVersionInfo_url = url_header + "Business/GetVersionBusiness.ashx";
+    public static String getVersionInfo_url = url_header + "GetVersionBusiness.ashx";
+
+    //登录
+    public static String login_url = url_header + "AppLogin.ashx";
 
     /**
      * Http POST请求通用方法
@@ -101,8 +112,7 @@ public class HttpUtil {
                     JSONObject jsonObject_response = jsonArray_response.getJSONObject(0);
                     int flag = jsonObject_response.getInt("flag");
                     if (flag == HTTP_RESPONSE_STATE_SUCCESS){
-                        JSONArray jsonArray_data = jsonObject_response.getJSONArray("data");
-                        listener.onSuccessResponse(jsonArray_data);
+                        listener.onSuccessResponse(jsonObject_response);
                     }else {
                         listener.onConnectingError();
                         String msg = jsonObject_response.getString("msg");
@@ -123,6 +133,7 @@ public class HttpUtil {
         }){
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
+                params.put("OpenId", OPEN_ID);
                 if (needLogin){
                     addLoginVolleyHttpParams_Post(params);
                 }
@@ -150,13 +161,14 @@ public class HttpUtil {
      */
     public static void sendVolleyStringRequest_Get(final Context context, String url, final Map<String, String> params, final boolean needLogin, final String annotation,
                                                    final yingxiaoHttpResponseListener listener){
+        url += "?" + "OpenId=" + OPEN_ID;
         if (needLogin){
             addLoginVolleyHttpParams_Get(url);
         }
         for(String key:params.keySet()){
-            url += "?" + key + "=" + params.get(key);
+            url += "&" + key + "=" + params.get(key);
         }
-        //Log.d("yellow_temp", "get_url--->" + url);
+        Log.d("yellow_temp", "get_url--->" + url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
@@ -166,8 +178,7 @@ public class HttpUtil {
                     JSONObject jsonObject_response = jsonArray_response.getJSONObject(0);
                     int flag = jsonObject_response.getInt("flag");
                     if (flag == HTTP_RESPONSE_STATE_SUCCESS){
-                        JSONArray jsonArray_data = jsonObject_response.getJSONArray("data");
-                        listener.onSuccessResponse(jsonArray_data);
+                        listener.onSuccessResponse(jsonObject_response);
                     }else {
                         listener.onConnectingError();
                         String msg = jsonObject_response.getString("msg");

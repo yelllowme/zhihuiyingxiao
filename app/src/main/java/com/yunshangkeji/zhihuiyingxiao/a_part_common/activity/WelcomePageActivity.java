@@ -14,7 +14,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.yunshangkeji.zhihuiyingxiao.R;
 import com.yunshangkeji.zhihuiyingxiao.a_part_common.model.AppVersionModel;
+import com.yunshangkeji.zhihuiyingxiao.a_part_common.model.LocalUserModel;
 import com.yunshangkeji.zhihuiyingxiao.a_part_common.yingxiaoApplication;
+import com.yunshangkeji.zhihuiyingxiao.b_part_guide.activity.MerchandiseListActivity;
 import com.yunshangkeji.zhihuiyingxiao.util.DBUtil;
 import com.yunshangkeji.zhihuiyingxiao.util.HttpUtil;
 import com.yunshangkeji.zhihuiyingxiao.util.yingxiaoHttpResponseListener;
@@ -32,7 +34,7 @@ import java.util.Map;
  * WelcomePageActivity执行步骤：
  * 检测版本->有版本更新->跳转到更新界面
  *         ->没有版本更新->判定本地是否有登录账号——》有本地已登录账号——》login—（成功）—》WelcomePageActivity登陆后步骤
- *                                                                          —（失败）—》跳转到登录界面
+ *                                                                                —（失败）—》跳转到登录界面
  *                                               ——》无本地已登录账号——》跳转到登录界面
  * WelcomePageActivity登陆后步骤：
  * 根据login成功后获取到账号身份列表操作—（账号只有一个身份）—》默认选取这个身份，根据这个身份操作（跳转到相应界面），将这个身份记录到数据库
@@ -60,8 +62,8 @@ public class WelcomePageActivity extends Activity {
     private void stepAfterCheckVersion_notUpdate(){
         //判定用户登录情况
         //如果本地有已登录用户，服务器登录
-        if(DBUtil.isLogin()){
-            login_server();
+        if(DBUtil.isLocalLogin()){
+            login_server(DBUtil.getLoginLocalUser());
 
         //如果本地没有已登录用户，跳转到登录界面
         }else {
@@ -78,9 +80,10 @@ public class WelcomePageActivity extends Activity {
         HttpUtil.sendVolleyStringRequest_Get(WelcomePageActivity.this, HttpUtil.getVersionInfo_url, params, false, "yellow_getVersionInfo",
                 new yingxiaoHttpResponseListener() {
                     @Override
-                    public void onSuccessResponse(JSONArray jsonArray) {
+                    public void onSuccessResponse(JSONObject jsonObject) {
                         try {
-                            JSONObject jsonObject_data = jsonArray.getJSONObject(0);
+                            JSONArray jsonArray_data = jsonObject.getJSONArray("data");
+                            JSONObject jsonObject_data = jsonArray_data.getJSONObject(0);
                             AppVersionModel.appVersionModel.setYearVersion(jsonObject_data.getInt("year")); //设置年版本号
                             AppVersionModel.appVersionModel.setMonthVersion(jsonObject_data.getInt("Month"));//设置月版本号
                             AppVersionModel.appVersionModel.setWeekVersion(jsonObject_data.getInt("Day"));//设置周版本号
@@ -96,7 +99,7 @@ public class WelcomePageActivity extends Activity {
                             //如果需要版本更新，跳转到更新界面
                             }else {
                                 Intent intent = new Intent(WelcomePageActivity.this, AppUpdateActivity.class);
-                                startActivity(intent);
+                                 startActivity(intent);
                                 WelcomePageActivity.this.finish();
                             }
                         } catch (JSONException e) {
@@ -116,11 +119,61 @@ public class WelcomePageActivity extends Activity {
     }
 
     //服务器登录
-    private void login_server(){
-        //登录成功，根据用户角色跳转到主界面
-        //本地登录一次，更新token,role
+    private void login_server(final LocalUserModel loginUser){
+        try {
+            JSONObject jsonObject_params = new JSONObject();
+            jsonObject_params.put("Account", loginUser.getAccount());
+            jsonObject_params.put("Character", loginUser.getRole());
+            jsonObject_params.put("Password", loginUser.getPassword());
+            Map<String, String> params = new HashMap<>();
+            params.put("obj", jsonObject_params.toString());
+            HttpUtil.sendVolleyStringRequest_Post(WelcomePageActivity.this, HttpUtil.login_url, params, false, "yellow_login",
+                    new yingxiaoHttpResponseListener() {
+                        @Override
+                        public void onSuccessResponse(JSONObject jsonObject_response) {
+                            try {
+                                //登录成功
+                                JSONObject jsonObject_data = jsonObject_response.getJSONObject("data");
+                                String token = jsonObject_data.getString("Access_token");//获取token值
+                                //本地登录，更新token
+                                DBUtil.localLogin(loginUser.getAccount(), token, loginUser.getPassword());
+                                //跳转界面
+                                Intent intent = new Intent(WelcomePageActivity.this, MerchandiseListActivity.class);
+                                startActivity(intent);
+                                WelcomePageActivity.this.finish();
+                            } catch (JSONException e) {
+                                Toast.makeText(WelcomePageActivity.this, "自动登录失败，失败原因：返回参数解析错误，请反馈！",Toast.LENGTH_SHORT).show();
+                                DBUtil.localLogout();
+                                Intent intent = new Intent(WelcomePageActivity.this, LoginActivity.class);
+                                startActivity(intent);
+                                WelcomePageActivity.this.finish();
+                                e.printStackTrace();
+                            }
+                        }
 
-        //登录失败，提示自动登录失败，跳转到登录界面
-        //本地退出，所有账号logout
+                        @Override
+                        public void onConnectingError() {
+                            DBUtil.localLogout();
+                            Intent intent = new Intent(WelcomePageActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            WelcomePageActivity.this.finish();
+                        }
+
+                        @Override
+                        public void onDisconnectError() {
+                            DBUtil.localLogout();
+                            Intent intent = new Intent(WelcomePageActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            WelcomePageActivity.this.finish();
+                        }
+                    });
+        } catch (JSONException e) {
+            DBUtil.localLogout();
+            Toast.makeText(WelcomePageActivity.this, "自动登录失败，失败原因：账号密码读取错误，请反馈！",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(WelcomePageActivity.this, LoginActivity.class);
+            startActivity(intent);
+            WelcomePageActivity.this.finish();
+            e.printStackTrace();
+        }
     }
 }

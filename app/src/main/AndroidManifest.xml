@@ -21,6 +21,7 @@
         <activity android:name=".a_part_common.activity.AppUpdateActivity" android:screenOrientation="portrait"/>
         <activity android:name=".a_part_common.activity.ChoosedIdentityActivity" android:screenOrientation="portrait"/>
         <activity android:name=".b_part_guide.activity.MerchandiseListActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".b_part_guide.activity.ShoppingCarActivity" android:screenOrientation="portrait"/>
 
     </application>
 

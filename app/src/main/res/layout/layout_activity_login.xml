@@ -7,17 +7,22 @@
         android:id="@+id/edittext_login_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"/>
+        android:inputType="number"
+        android:maxLines="1"
+        android:hint="账号"/>
 
     <EditText
         android:id="@+id/edittext_login_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:hint="密码"/>
 
     <TextView
         android:id="@+id/texttview_login_loginBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:gravity="center"
         android:background="#FF654321"
         android:text="登录"/>
